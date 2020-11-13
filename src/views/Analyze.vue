@@ -1,14 +1,11 @@
 <template>
     <div class="amap-page-container">
-      <el-amap vid="amapDemo" :zoom="zoom" :center="center" class="amap-demo">
+      <el-amap vid="amapDemo" :zoom="zoom" :center="center" class="amap-demo" :events="this.events">
         <el-amap-marker vid="component-marker" :position="componentMarker.position" :content-render="componentMarker.contentRender" ></el-amap-marker>
         <el-amap-marker v-for="(marker, index) in markers" :position="marker.position" :events="marker.events" :visible="marker.visible" :draggable="marker.draggable" :vid="index" ></el-amap-marker>
       </el-amap>
       <div class="toolbar">
-        <a-button type="primary" name="button" v-on:click="toggleVisible">toggle first marker</a-button>
-        <a-button type="primary" name="button" v-on:click="changePosition">change position</a-button>
-        <a-button type="primary" name="button" v-on:click="chnageDraggle">change draggle</a-button>
-        <a-button type="primary" name="button" v-on:click="addMarker">add marker</a-button>
+        
         <a-button type="primary" name="button" v-on:click="removeMarker">remove marker</a-button>
         <a-button type="primary" name="button" v-on:click="result">result</a-button>
       </div>
@@ -26,7 +23,7 @@
   </style>
 
   <script>
-    import { AMapManager } from 'vue-amap';
+    //import { AMapManager } from 'vue-amap';
     const exampleComponents = {
       props: ['text'],
       template: `<div>text from  parent: {{text}}</div>`
@@ -42,8 +39,21 @@
             color: '#333',
             border: '1px solid #aaa'
           },
-          zoom: 14,
+          zoom: 5,
           center: [100.5273285, 38.21515044],
+          events: {
+            'click': (e) => {
+              if(this.markers.length <= 25 ){
+                //alert(e.lnglat);
+              let marker = {
+              position: [e.lnglat.lng, e.lnglat.lat]
+              };
+              this.markers.push(marker);
+            }else{
+            this.$message.error('标点过量！！请不要超过25个');
+          }
+            }
+          },
           markers: [
             {
               position: [100.5273285, 38.21515044],
@@ -94,41 +104,14 @@
       methods: {
         onClick(e) {
           this.count += 1;
-          alert("555");
-          console.log(amapManager.getMap());
+          //alert("555");
+          //console.log(amapManager.getMap());
           // let marker1 = {
           //   position: e.lnglat,
           // };
           // this.markers.push(marker1);
         },
-        changePosition() {
-          let position = this.markers[0].position;
-          this.markers[0].position = [position[0] + 1, position[1] - 1];
-          this.$store.state.markers[0] = this.markers[0].position;
-        },
-        chnageDraggle() {
-          let draggable = this.markers[0].draggable;
-          this.markers[0].draggable = !draggable;
-          // console.log(this.markers[0].position);
-        },
-        toggleVisible() {
-          let visableVar = this.markers[0].visible;
-          this.markers[0].visible = !visableVar;
-        },
-        addMarker() {
-          if(this.markers.length <= 25 )
-          {
-            let marker = {
-            position: [100.5273285 + (Math.random() - 0.5) * 12, 38.21515044 + (Math.random() - 0.5) * 12]
-          };
-          this.markers.push(marker);
-          this.$store.state.markers.push(marker.position);
-          }
-          else{
-            this.$message.error('标点过量！！请不要超过25个');
-          }
-          
-        },
+ 
         removeMarker() {
           if (!this.markers.length) return;
           this.markers.splice(this.markers.length - 1, 1);
