@@ -26,7 +26,7 @@
   </style>
 
   <script>
-    import { AMapManager } from 'vue-amap';
+    //import { AMapManager } from 'vue-amap';
     const exampleComponents = {
       props: ['text'],
       template: `<div>text from  parent: {{text}}</div>`
