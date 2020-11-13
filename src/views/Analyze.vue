@@ -3,6 +3,7 @@
       <el-amap vid="amapDemo" :zoom="zoom" :center="center" class="amap-demo" :events="this.events">
         <el-amap-marker vid="component-marker" :position="componentMarker.position" :content-render="componentMarker.contentRender" ></el-amap-marker>
         <el-amap-marker v-for="(marker, index) in markers" :position="marker.position" :events="marker.events" :visible="marker.visible" :draggable="marker.draggable" :vid="index" ></el-amap-marker>
+        <el-amap-polyline :editable="polyline.editable"  :path="polyline.path" :events="polyline.events" v-if="jump"></el-amap-polyline>
       </el-amap>
       <div class="toolbar">
         
@@ -33,6 +34,7 @@
       data() {
         return {
           count: 1,
+          jump:false,
           slotStyle: {
             padding: '2px 8px',
             background: '#eee',
@@ -72,6 +74,19 @@
               template: '<span>1</span>',
             }
           ],
+           polyline: {
+            path: [[100.5389385, 50.21515044], [300.5389385, 31.29615044], [5.5273285, 70.21515044]],
+            events: {
+              click(e) {
+                alert('click polyline');
+              },
+              end: (e) => {
+                let newPath = e.target.getPath().map(point => [point.lng, point.lat]);
+                console.log(newPath);
+              }
+            },
+            editable: false
+          },
           renderMarker: {
             position: [100.5273285, 38.21515044],
             contentRender: (h, instance) => {
@@ -118,9 +133,10 @@
           this.$store.markers.splice(this.markers.length - 1, 1);
         },
         result: function(){
-	      this.$router.replace('/polyline');
-	      this.way2 = 'result'
-	}
+	      //this.$router.replace('/polyline');
+        this.way2 = 'result';
+        this.jump = ! this.jump;
+	    }
       }
     };
 </script>
