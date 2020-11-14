@@ -110,9 +110,18 @@
           }
         };
       },
-      created() {
-      this.initWebSocket();
+      computed:{
+          sendmess:function(){
+            let a = [];
+            this.markers.forEach(function(element) {
+            a.push(element.position);
+          });
+            return a;
+        }
       },
+      // created() {             //由页面创建时初始化socket改为点击result再初始化？？没成功
+      // this.initWebSocket();
+      // },
       destroyed() {
       this.websock.close() //离开路由之后断开websocket连接
       },
@@ -125,9 +134,20 @@
           this.markers.splice(this.markers.length - 1, 1);
         },
         result: function(){
-	      //this.$router.replace('/polyline');
+        this.$axios
+        .post("http://192.168.1.102:8000/input/", {
+          data: this.sendmess,
+          
+        })
+        .then(response => {
+          
+        })
+        .catch(error => {
+          this.$emit("on-error", error);
+        });
         this.way2 = 'result';
         this.jump = ! this.jump;
+        this.initWebSocket();
         },
         initWebSocket(){ //初始化weosocket
         const wsuri = "ws://127.0.0.1:8080";                      //后端接口
@@ -138,7 +158,7 @@
         this.websock.onclose = this.websocketclose;
       },
       websocketonopen(){ //连接建立之后执行send方法发送数据
-        let actions = this.markers;
+        let actions = this.markers;    //发送markers
         this.websocketsend(JSON.stringify(actions));
       },
       websocketonerror(){//连接建立失败重连

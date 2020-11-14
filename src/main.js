@@ -9,6 +9,7 @@ import axios from 'axios'
 import VueAxios from 'vue-axios'
 import VueWebsocket from "vue-websocket";
 
+Vue.prototype.$axios = axios //全局注册，使用方法为:this.$axios
 Vue.use(VueWebsocket);
 Vue.use(VueAxios, axios);
 
@@ -31,7 +32,7 @@ new Vue({
 }).$mount('#app')
 
 axios({
-  url: '192.168.14.24',    //后端接口，
+  url: '192.168.1.102',    //后端接口，
   method: 'post',
   data: {
     markers: this.$store.state.markers,
