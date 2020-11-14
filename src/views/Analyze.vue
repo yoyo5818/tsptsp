@@ -5,8 +5,7 @@
         <el-amap-marker v-for="(marker, index) in markers" :position="marker.position" :events="marker.events" :visible="marker.visible" :draggable="marker.draggable" :vid="index" ></el-amap-marker>
         <el-amap-polyline :editable="polyline.editable"  :path="polyline.path" :events="polyline.events" v-if="jump"></el-amap-polyline>
       </el-amap>
-      <div class="toolbar">
-        
+      <div class="toolbar"> 
         <a-button type="primary" name="button" v-on:click="removeMarker">remove marker</a-button>
         <a-button type="primary" name="button" v-on:click="result">result</a-button>
       </div>
@@ -24,7 +23,6 @@
   </style>
 
   <script>
-    //import { AMapManager } from 'vue-amap';
     const exampleComponents = {
       props: ['text'],
       template: `<div>text from  parent: {{text}}</div>`
@@ -35,6 +33,7 @@
         return {
           count: 1,
           jump:false,
+          websock: null,
           slotStyle: {
             padding: '2px 8px',
             background: '#eee',
@@ -56,17 +55,12 @@
           }
             }
           },
-          markers: [
+          markers: [                                                    //标记数组
             {
               position: [100.5273285, 38.21515044],
               events: {
                 click: () => {
                   alert('click marker');
-                },
-                dragend: (e) => {
-                  console.log('---event---: dragend')
-                  this.markers[0].position = [e.lnglat.lng, e.lnglat.lat];
-                  this.$store.state.markers[0] = this.markers[0].position;
                 }
               },
               visible: true,
@@ -75,7 +69,7 @@
             }
           ],
            polyline: {
-            path: [[100.5389385, 50.21515044], [300.5389385, 31.29615044], [5.5273285, 70.21515044]],
+            path: [[100.5273285, 38.21515044], [125.5389385, 31.29615044], [90.5273285, 40.21515044]],     //路线
             events: {
               click(e) {
                 alert('click polyline');
@@ -116,27 +110,49 @@
           }
         };
       },
+      created() {
+      this.initWebSocket();
+      },
+      destroyed() {
+      this.websock.close() //离开路由之后断开websocket连接
+      },
       methods: {
         onClick(e) {
           this.count += 1;
-          //alert("555");
-          //console.log(amapManager.getMap());
-          // let marker1 = {
-          //   position: e.lnglat,
-          // };
-          // this.markers.push(marker1);
         },
- 
         removeMarker() {
           if (!this.markers.length) return;
           this.markers.splice(this.markers.length - 1, 1);
-          this.$store.markers.splice(this.markers.length - 1, 1);
         },
         result: function(){
 	      //this.$router.replace('/polyline');
         this.way2 = 'result';
         this.jump = ! this.jump;
-	    }
+        },
+        initWebSocket(){ //初始化weosocket
+        const wsuri = "ws://127.0.0.1:8080";                      //后端接口
+        this.websock = new WebSocket(wsuri);
+        this.websock.onmessage = this.websocketonmessage;
+        this.websock.onopen = this.websocketonopen;
+        this.websock.onerror = this.websocketonerror;
+        this.websock.onclose = this.websocketclose;
+      },
+      websocketonopen(){ //连接建立之后执行send方法发送数据
+        let actions = this.markers;
+        this.websocketsend(JSON.stringify(actions));
+      },
+      websocketonerror(){//连接建立失败重连
+        this.initWebSocket();
+      },
+      websocketonmessage(e){ //数据接收
+        const redata = JSON.parse(e.data);
+      },
+      websocketsend(Data){//数据发送
+        this.websock.send(Data);
+      },
+      websocketclose(e){  //关闭
+        console.log('断开连接',e);
+      },
       }
     };
 </script>
