@@ -27,15 +27,9 @@
           :events="polyline.events"
         ></el-amap-polyline>
       </el-amap>
-      <div class="toolbar">
-        <a-table
-          :pagination="false"
-          :columns="columns"
-          :data-source="data"
-          :scroll="{ y: 300 }"
-          style="width: 300px; height: 380px"
-        >
-          <a slot="name" slot-scope="text">{{ text }}</a>
+      <div class="toolbar"> 
+        <a-table :pagination="false" :columns="columns" :data-source="data" :scroll="{ y: 300 }" style="width: 300px; height: 360px">
+        <a slot="name" slot-scope="text">{{ text }}</a>
         </a-table>
         <div class="paras">
           <a-row>
@@ -122,10 +116,10 @@
   <script>
 const columns = [
   {
-    title: "生成结果时间",
-    dataIndex: "time",
-    key: "time",
-    width: 80,
+    title: '生成结果时间',
+    dataIndex: 'time',
+    key: 'time',
+    width: 120,
   },
   {
     title: "最优路径距离",
@@ -246,6 +240,83 @@ module.exports = {
       slotMarker: {
         position: [121.5073285, 38.21515044],
       },
+      methods: {
+        onClick(e) {
+          this.count += 1;
+        },
+        removeMarker() {
+          if (!this.markers.length) return;
+          this.markers.splice(this.markers.length - 1, 1);
+          this.polyline.path = [];
+        },
+        result: function(){
+          //this.openNotificationWithIcon('success');
+        if(this.markers.length >= 5){
+          this.disabled = true;
+          this.$axios
+        .post("http://192.168.1.102:8000/input/", {
+          data: this.sendmess,
+          max_generation: this.inputValue1,
+          population_size: this.inputValue2,
+          p_mutation: this.inputValue,
+        })
+        .then(response => {
+          this.polyline.path = response.data.result;
+          this.time = response.data.time;
+          this.result_distance = response.data.result_distance;
+          let ress = {
+            key: '' + this.key++,
+            time: '' + this.time + 's',
+            length: ''+this.result_distance +'m',
+          }
+          this.data.push(ress);
+          //this.openNotificationWithIcon('success');
+          this.disabled = false;
+        })
+        .catch(error => {
+          //console.log(error);
+          this.disabled = false;
+          this.$message.error(error.response.data.detail);
+          //console.log(error.response.data.detail);
+        });
+        this.way2 = 'result';
+        }else{
+          this.$message.error('标点数量须大于5！！');
+        }
+        
+        },
+        //以下是vue-socket
+        
+      //   initWebSocket(){ //初始化weosocket
+      //   const wsuri = "ws://192.168.1.102:8000";                      //后端接口
+      //   this.websock = new WebSocket(wsuri);
+      //   this.websock.onmessage = this.websocketonmessage;
+      //   this.websock.onopen = this.websocketonopen;
+      //   this.websock.onerror = this.websocketonerror;
+      //   this.websock.onclose = this.websocketclose;
+      // },
+      // websocketonopen(){ //连接建立之后执行send方法发送数据
+      //   let actions = {
+      //     data: this.sendmess,
+      //     max_generation: this.inputValue1,
+      //     population_size: this.inputValue2,
+      //     p_mutation: this.inputValue,
+      //   } ;  //发送markers
+      //   this.websocketsend(JSON.stringify(actions));
+      // },
+      // websocketonerror(){//连接建立失败重连
+      //   this.initWebSocket();
+      // },
+      // websocketonmessage(e){ //数据接收
+      //   const redata = JSON.parse(e.data);
+      // },
+      // websocketsend(Data){//数据发送
+      //   this.websock.send(Data);
+      // },
+      // websocketclose(e){  //关闭
+      //   console.log('断开连接',e);
+      // },
+      }
     };
   },
   computed: {
