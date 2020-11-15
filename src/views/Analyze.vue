@@ -78,6 +78,7 @@
   </style>
 
   <script>
+ 
   const columns = [
   
   {
@@ -200,11 +201,11 @@
             return a;
         }
       },
-      // created() {             //由页面创建时初始化socket改为点击result再初始化？？没成功
-      // this.initWebSocket();
-      // },
+      created() {             //由页面创建时初始化socket改为点击result再初始化？？没成功
+      createSocket('ws://192.168.1.102:8000')
+      },
       destroyed() {
-      this.websock.close() //离开路由之后断开websocket连接
+      //this.websock.close() //离开路由之后断开websocket连接
       },
       methods: {
         onClick(e) {
@@ -246,48 +247,42 @@
           //console.log(error.response.data.detail);
         });
         this.way2 = 'result';
-        this.initWebSocket();
         }else{
           this.$message.error('标点数量须大于5！！');
         }
         
         },
-        // openNotificationWithIcon(type) {
-        // this.$notification[type]({
-        // message: '结果生成报告',
-        // description:
-        //   '生成结果总时间: ' + 1000 +' s \u3000\u3000\u3000\u3000\u3000最优路径距离:'+ this.result_distance + ' m',
-        //   style: {
-        //   width: '320px',
-        //   marginLeft: `${700 - 600}px`,
-        //   marginTop: `${650 - 600}px`,
-        //  },
-        //  });
-        // },
-        initWebSocket(){ //初始化weosocket
-        const wsuri = "ws://127.0.0.1:8080";                      //后端接口
-        this.websock = new WebSocket(wsuri);
-        this.websock.onmessage = this.websocketonmessage;
-        this.websock.onopen = this.websocketonopen;
-        this.websock.onerror = this.websocketonerror;
-        this.websock.onclose = this.websocketclose;
-      },
-      websocketonopen(){ //连接建立之后执行send方法发送数据
-        let actions = this.markers;    //发送markers
-        this.websocketsend(JSON.stringify(actions));
-      },
-      websocketonerror(){//连接建立失败重连
-        this.initWebSocket();
-      },
-      websocketonmessage(e){ //数据接收
-        const redata = JSON.parse(e.data);
-      },
-      websocketsend(Data){//数据发送
-        this.websock.send(Data);
-      },
-      websocketclose(e){  //关闭
-        console.log('断开连接',e);
-      },
+        //以下是vue-socket
+        
+      //   initWebSocket(){ //初始化weosocket
+      //   const wsuri = "ws://192.168.1.102:8000";                      //后端接口
+      //   this.websock = new WebSocket(wsuri);
+      //   this.websock.onmessage = this.websocketonmessage;
+      //   this.websock.onopen = this.websocketonopen;
+      //   this.websock.onerror = this.websocketonerror;
+      //   this.websock.onclose = this.websocketclose;
+      // },
+      // websocketonopen(){ //连接建立之后执行send方法发送数据
+      //   let actions = {
+      //     data: this.sendmess,
+      //     max_generation: this.inputValue1,
+      //     population_size: this.inputValue2,
+      //     p_mutation: this.inputValue,
+      //   } ;  //发送markers
+      //   this.websocketsend(JSON.stringify(actions));
+      // },
+      // websocketonerror(){//连接建立失败重连
+      //   this.initWebSocket();
+      // },
+      // websocketonmessage(e){ //数据接收
+      //   const redata = JSON.parse(e.data);
+      // },
+      // websocketsend(Data){//数据发送
+      //   this.websock.send(Data);
+      // },
+      // websocketclose(e){  //关闭
+      //   console.log('断开连接',e);
+      // },
       }
     };
 </script>

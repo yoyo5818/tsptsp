@@ -13,7 +13,7 @@
               <a-icon type="read" />算法说明
             </a>
           </a-menu-item>
-          <!-- <a-menu-item key="app">
+          <a-menu-item key="app">
             <a href="#2">
               <a-icon type="read" />使用说明
             </a>

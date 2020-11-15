@@ -5,12 +5,14 @@ import store from './store'
 import VueAMap from 'vue-amap';
 import Antd from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
-import axios from 'axios'
-import VueAxios from 'vue-axios'
-import VueWebsocket from "vue-websocket";
+import axios from 'axios';
+import VueAxios from 'vue-axios';
+import { createSocket } from '@sven0706/websocket';
+import { sendWSPush } from '@sven0706/websocket';
+
 
 Vue.prototype.$axios = axios //全局注册，使用方法为:this.$axios
-Vue.use(VueWebsocket);
+
 Vue.use(VueAxios, axios);
 
 Vue.use(Antd);
@@ -31,13 +33,3 @@ new Vue({
   render: h => h(App)
 }).$mount('#app')
 
-axios({
-  url: '192.168.1.102',    //后端接口，
-  method: 'post',
-  data: {
-    markers: this.$store.state.markers,
-    
-  },
-}).then(res => {
-
-})
