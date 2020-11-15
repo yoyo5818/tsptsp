@@ -7,9 +7,6 @@ import Antd from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
-import { createSocket } from '@sven0706/websocket';
-import { sendWSPush } from '@sven0706/websocket';
-
 
 Vue.prototype.$axios = axios //全局注册，使用方法为:this.$axios
 
