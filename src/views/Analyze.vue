@@ -7,7 +7,7 @@
         <el-amap-polyline :editable="polyline.editable"  :path="polyline.path" :events="polyline.events" ></el-amap-polyline>
       </el-amap>
       <div class="toolbar"> 
-        <a-table :pagination="false" :columns="columns" :data-source="data" :scroll="{ y: 300 }" style="width: 300px; height: 380px">
+        <a-table :pagination="false" :columns="columns" :data-source="data" :scroll="{ y: 300 }" style="width: 300px; height: 360px">
         <a slot="name" slot-scope="text">{{ text }}</a>
         </a-table>
         <div class="paras">
@@ -85,7 +85,7 @@
     title: '生成结果时间',
     dataIndex: 'time',
     key: 'time',
-    width: 80,
+    width: 120,
   },
   {
     title: '最优路径距离',
@@ -233,8 +233,8 @@
           this.result_distance = response.data.result_distance;
           let ress = {
             key: '' + this.key++,
-            time: '' + this.time,
-            length: ''+this.result_distance
+            time: '' + this.time + 's',
+            length: ''+this.result_distance +'m',
           }
           this.data.push(ress);
           //this.openNotificationWithIcon('success');
