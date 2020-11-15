@@ -1,28 +1,101 @@
 <template>
-    <div class="amap-page-container">
+<div>
+  <div class="amap-page-container">
       <el-amap vid="amapDemo" :zoom="zoom" :center="center" class="amap-demo" :events="this.events">
         <el-amap-marker vid="component-marker" :position="componentMarker.position" :content-render="componentMarker.contentRender" ></el-amap-marker>
         <el-amap-marker v-for="(marker, index) in markers" :position="marker.position" :events="marker.events" :visible="marker.visible" :draggable="marker.draggable" :vid="index" ></el-amap-marker>
-        <el-amap-polyline :editable="polyline.editable"  :path="polyline.path" :events="polyline.events" v-if="jump"></el-amap-polyline>
+        <el-amap-polyline :editable="polyline.editable"  :path="polyline.path" :events="polyline.events" ></el-amap-polyline>
       </el-amap>
       <div class="toolbar"> 
-        <a-button type="primary" name="button" v-on:click="removeMarker">remove marker</a-button>
-        <a-button type="primary" name="button" v-on:click="result">result</a-button>
+        <a-table :pagination="false" :columns="columns" :data-source="data" :scroll="{ y: 300 }" style="width: 300px; height: 380px">
+        <a slot="name" slot-scope="text">{{ text }}</a>
+        </a-table>
+        <div class="paras">
+        <a-row>
+      <a-col :span="12">
+        <span>迭代遗传数：</span>
+        <a-slider v-model="inputValue1" :min="10" :max="5000" />
+      </a-col>
+      <a-col :span="4">
+        <a-input-number v-model="inputValue1" :min="10" :max="5000" style="marginLeft: 16px" />
+      </a-col>
+    </a-row>
+    <a-row>
+      <a-col :span="12">
+        <span>遗传个体数：</span>
+        <a-slider v-model="inputValue2" :min="10" :max="1000" />
+      </a-col>
+      <a-col :span="4">
+        <a-input-number v-model="inputValue2" :min="10" :max="1000" style="marginLeft: 16px" />
+      </a-col>
+    </a-row>
+    <a-row>
+      <a-col :span="12">
+        <span>变异率</span>
+        <a-slider v-model="inputValue" :min="0" :max="1" :step="0.01" />
+      </a-col>
+      <a-col :span="4">
+        <a-input-number
+          v-model="inputValue"
+          :min="0"
+          :max="1"
+          :step="0.01"
+          style="marginLeft: 16px"
+        />
+      </a-col>
+    </a-row>
+  </div>
+        <a-button  name="button" v-on:click="removeMarker">remove marker</a-button>
+        <a-button type="primary" name="button" v-on:click="result" :disabled="disabled">result</a-button>
       </div>
-    </div>
+      
+  </div>
+    
+</div>
+    
 </template>
 
   <style>
   .amap-page-container{
-    height: 500px;
+    height: 570px;
+    width: 920px;
   }
   .toolbar{
-    margin-top: 30px;
-    text-align: center;
+    position: relative;
+    top: -570px;
+    left: 930px;
+  }
+  .code-box-demo .ant-slider {
+  margin-bottom: 16px;
+  }
+  .paras{
+    width:300px;
+    margin-bottom: 8px;
+    /* position: relative;
+    float: right;
+    top: -250px; */
   }
   </style>
 
   <script>
+  const columns = [
+  
+  {
+    title: '生成结果时间',
+    dataIndex: 'time',
+    key: 'time',
+    width: 80,
+  },
+  {
+    title: '最优路径距离',
+    dataIndex: 'length',
+    key: 'length',
+    ellipsis: true,
+  },
+  
+  
+];
+    const data = [];
     const exampleComponents = {
       props: ['text'],
       template: `<div>text from  parent: {{text}}</div>`
@@ -31,8 +104,16 @@
       name: 'Analyze',
       data() {
         return {
+          disabled: false,
+          data,
+          columns,
+          key: 1,
+          time: null,
+          result_distance: null,
+          inputValue: 0,
+          inputValue1: 10,
+          inputValue2: 10,
           count: 1,
-          jump:false,
           websock: null,
           slotStyle: {
             padding: '2px 8px',
@@ -44,7 +125,7 @@
           center: [100.5273285, 38.21515044],
           events: {
             'click': (e) => {
-              if(this.markers.length <= 25 ){
+              if(this.markers.length <= 30 ){
                 //alert(e.lnglat);
               let marker = {
               position: [e.lnglat.lng, e.lnglat.lat]
@@ -60,7 +141,7 @@
               position: [100.5273285, 38.21515044],
               events: {
                 click: () => {
-                  alert('click marker');
+                alert('click marker');
                 }
               },
               visible: true,
@@ -69,7 +150,7 @@
             }
           ],
            polyline: {
-            path: [[100.5273285, 38.21515044], [125.5389385, 31.29615044], [90.5273285, 40.21515044]],     //路线
+            path: [],     //路线
             events: {
               click(e) {
                 alert('click polyline');
@@ -132,23 +213,57 @@
         removeMarker() {
           if (!this.markers.length) return;
           this.markers.splice(this.markers.length - 1, 1);
+          this.polyline.path = [];
         },
         result: function(){
-        this.$axios
+          //this.openNotificationWithIcon('success');
+        if(this.markers.length >= 5){
+          this.disabled = true;
+          this.$axios
         .post("http://192.168.1.102:8000/input/", {
           data: this.sendmess,
-          
+          max_generation: this.inputValue1,
+          population_size: this.inputValue2,
+          p_mutation: this.inputValue,
         })
         .then(response => {
-          
+          this.polyline.path = response.data.result;
+          this.time = response.data.time;
+          this.result_distance = response.data.result_distance;
+          let ress = {
+            key: '' + this.key++,
+            time: '' + this.time,
+            length: ''+this.result_distance
+          }
+          this.data.push(ress);
+          //this.openNotificationWithIcon('success');
+          this.disabled = false;
         })
         .catch(error => {
-          this.$emit("on-error", error);
+          //console.log(error);
+          this.disabled = false;
+          this.$message.error(error.response.data.detail);
+          //console.log(error.response.data.detail);
         });
         this.way2 = 'result';
-        this.jump = ! this.jump;
         this.initWebSocket();
+        }else{
+          this.$message.error('标点数量须大于5！！');
+        }
+        
         },
+        // openNotificationWithIcon(type) {
+        // this.$notification[type]({
+        // message: '结果生成报告',
+        // description:
+        //   '生成结果总时间: ' + 1000 +' s \u3000\u3000\u3000\u3000\u3000最优路径距离:'+ this.result_distance + ' m',
+        //   style: {
+        //   width: '320px',
+        //   marginLeft: `${700 - 600}px`,
+        //   marginTop: `${650 - 600}px`,
+        //  },
+        //  });
+        // },
         initWebSocket(){ //初始化weosocket
         const wsuri = "ws://127.0.0.1:8080";                      //后端接口
         this.websock = new WebSocket(wsuri);

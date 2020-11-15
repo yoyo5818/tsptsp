@@ -19,7 +19,11 @@
       </a-menu>
     </a-layout-sider>
     <a-layout>
-      <a-layout-header style="background: #fff; padding: 0" />
+      <a-layout-header style="background: #fff; padding-left: 50px;">
+        <span>
+            团队成员：荣鹏 、 胡锦龙 、 董文睿
+        </span>
+      </a-layout-header>
       <a-layout-content style="margin: 0 16px">
         <a-breadcrumb style="margin: 16px 0">
           <a-breadcrumb-item>遗传算法求解TSP</a-breadcrumb-item>
