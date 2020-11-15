@@ -290,6 +290,7 @@ module.exports = {
     websocketonmessage(e) {
       try{
         this.test = JSON.parse(e.data)
+        this.$forceUpdate()
       }
       catch{
         console.log(e.data)
