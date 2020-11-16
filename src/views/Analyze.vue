@@ -35,7 +35,7 @@
            <a-row>
             <a-col :span="12">
               <span>迭代精准次数：</span>
-              <a-slider v-model="inputValue1" :min="100" :max="500" />
+              <a-slider v-model="inputValue3" :min="100" :max="500" />
             </a-col>
             <a-col :span="4">
               <a-input-number
@@ -154,15 +154,11 @@ module.exports = {
       center: [100.5273285, 38.21515044],
       events: {
         click: (e) => {
-          if (this.markers.length <= 30) {
             //alert(e.lnglat);
             let marker = {
               position: [e.lnglat.lng, e.lnglat.lat],
             };
             this.markers.push(marker);
-          } else {
-            this.$message.error("标点过量！！请不要超过25个");
-          }
         },
       },
       markers: [
