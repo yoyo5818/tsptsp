@@ -27,28 +27,24 @@
           :events="polyline.events"
         ></el-amap-polyline>
       </el-amap>
-      <div class="toolbar"> 
-        <a-table :pagination="false" :columns="columns" :data-source="data" :scroll="{ y: 300 }" style="width: 300px; height: 360px">
-        <a slot="name" slot-scope="text">{{ text }}</a>
+      <div class="toolbar">
+        <a-table
+          :pagination="false"
+          :columns="columns"
+          :data-source="data"
+          :scroll="{ y: 300 }"
+          style="width: 300px; height: 360px"
+        >
+          <a slot="name" slot-scope="text">{{ text }}</a>
         </a-table>
         <div class="paras">
-           <a-row>
-            <a-col :span="12">
-              <span>迭代精准次数：</span>
-              <a-slider v-model="inputValue3" :min="100" :max="500" />
-            </a-col>
-            <a-col :span="4">
-              <a-input-number
-                v-model="inputValue3"
-                :min="100"
-                :max="500"
-                style="marginleft: 16px"
-              />
-            </a-col>
-          </a-row>
           <a-row>
             <a-col :span="12">
-              <span>迭代遗传数：</span>
+              <a-tooltip>
+                <template slot="title">该值为遗传算法运行多少代</template>
+                <span>迭代遗传数：</span>
+              </a-tooltip>
+
               <a-slider v-model="inputValue1" :min="10" :max="5000" />
             </a-col>
             <a-col :span="4">
@@ -62,7 +58,31 @@
           </a-row>
           <a-row>
             <a-col :span="12">
-              <span>遗传个体数：</span>
+              <a-tooltip>
+                <template slot="title">
+                  该值为最优结果重复多少代时结束计算
+                </template>
+                <span>迭代精准次数：</span>
+              </a-tooltip>
+
+              <a-slider v-model="inputValue3" :min="10" :max="inputValue1" />
+            </a-col>
+            <a-col :span="4">
+              <a-input-number
+                v-model="inputValue3"
+                :min="10"
+                :max="inputValue1"
+                style="marginleft: 16px"
+              />
+            </a-col>
+          </a-row>
+          <a-row>
+            <a-col :span="12">
+              <a-tooltip>
+                <template slot="title"> 该值为遗传算法初始父代个体数 </template>
+                <span>遗传个体数：</span>
+              </a-tooltip>
+
               <a-slider v-model="inputValue2" :min="10" :max="1000" />
             </a-col>
             <a-col :span="4">
@@ -90,18 +110,14 @@
             </a-col>
           </a-row>
         </div>
-        <a-button name="button" v-on:click="removeMarker"
-          >remove marker</a-button
-        >
-        <a-button name="button" v-on:click="empty"
-          >empty</a-button
-        >
+        <a-button name="button" v-on:click="removeMarker">去除最新点</a-button>
+        <a-button name="button" v-on:click="empty">初始化</a-button>
         <a-button
           type="primary"
           name="button"
           v-on:click="result"
           :disabled="disabled"
-          >result</a-button
+          >分析</a-button
         >
       </div>
     </div>
@@ -110,9 +126,9 @@
 <script>
 const columns = [
   {
-    title: '生成结果时间',
-    dataIndex: 'time',
-    key: 'time',
+    title: "计算耗时",
+    dataIndex: "time",
+    key: "time",
     width: 120,
   },
   {
@@ -131,7 +147,7 @@ module.exports = {
   name: "Analyze",
   data() {
     return {
-      test:null,
+      test: null,
       disabled: false,
       data,
       columns,
@@ -154,11 +170,11 @@ module.exports = {
       center: [100.5273285, 38.21515044],
       events: {
         click: (e) => {
-            //alert(e.lnglat);
-            let marker = {
-              position: [e.lnglat.lng, e.lnglat.lat],
-            };
-            this.markers.push(marker);
+          //alert(e.lnglat);
+          let marker = {
+            position: [e.lnglat.lng, e.lnglat.lat],
+          };
+          this.markers.push(marker);
         },
       },
       markers: [
@@ -265,35 +281,34 @@ module.exports = {
     },
     websocketonopen() {
       //连接建立之后执行send方法发送数据
-      this.websocketsend('ping');
+      this.websocketsend("ping");
     },
     websocketonerror() {
       //连接建立失败重连
       this.initWebSocket();
     },
     websocketonmessage(e) {
-      try{
+      try {
         this.test = JSON.parse(e.data);
-        this.$forceUpdate()
-        this.change()
-      }
-      catch(err){
-        console.log(err)
-        console.log(e.data)
+        this.$forceUpdate();
+        this.change();
+      } catch (err) {
+        console.log(err);
+        console.log(e.data);
       }
     },
-    change(){
+    change() {
       let a = this.markers;
-      let b = [] ;
-      this.test.result.forEach(function(element){
-        b.push(a[element].position)
-      })
+      let b = [];
+      this.test.result.forEach(function (element) {
+        b.push(a[element].position);
+      });
       b.push(a[this.test.result[0]].position);
       this.polyline.path = b;
       let infoo = {
-        key: '1',
-        time: ''+this.test.time+'s',
-        length: ''+this.test.result_distance
+        key: "1",
+        time: "" + this.test.time + "s",
+        length: "" + this.test.result_distance,
       };
       console.log(infoo);
       this.data[this.key] = infoo;
@@ -311,26 +326,30 @@ module.exports = {
       this.polyline.path = [];
     },
     result: function () {
-      if(this.markers.length >= 5)
-      {
+      if (this.markers.length >= 5) {
         let thedata = {
-        data: this.sendmess,
-        max_generation: this.inputValue1,
-        population_size: this.inputValue2,
-        p_mutation: this.inputValue,
-        fitness_times: this.inputValue3,
-      }
-      this.websocketsend(JSON.stringify(thedata));
-      this.key++;
-      }else{
+          data: this.sendmess,
+          max_generation: this.inputValue1,
+          population_size: this.inputValue2,
+          p_mutation: this.inputValue,
+          fitness_times: this.inputValue3,
+        };
+        this.websocketsend(JSON.stringify(thedata));
+        this.key++;
+      } else {
         this.$message.error("标点数量须大于等于5！");
       }
-      
     },
-    empty: function() {
+    empty: function () {
       this.markers = [];
       this.polyline.path = [];
-    }
+      this.inputValue = 0.0;
+      this.inputValue1 = 10;
+      this.inputValue2 = 10;
+      this.inputValue3 = 10;
+      this.data = [];
+      this.key = -1;
+    },
   },
 };
 </script>
