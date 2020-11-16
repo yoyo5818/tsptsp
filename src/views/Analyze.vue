@@ -90,30 +90,7 @@
     </div>
   </div>
 </template>
-
-  <style>
-.amap-page-container {
-  height: 570px;
-  width: 920px;
-}
-.toolbar {
-  position: relative;
-  top: -570px;
-  left: 930px;
-}
-.code-box-demo .ant-slider {
-  margin-bottom: 16px;
-}
-.paras {
-  width: 300px;
-  margin-bottom: 8px;
-  /* position: relative;
-    float: right;
-    top: -250px; */
-}
-</style>
-
-  <script>
+<script>
 const columns = [
   {
     title: '生成结果时间',
@@ -240,83 +217,6 @@ module.exports = {
       slotMarker: {
         position: [121.5073285, 38.21515044],
       },
-      methods: {
-        onClick(e) {
-          this.count += 1;
-        },
-        removeMarker() {
-          if (!this.markers.length) return;
-          this.markers.splice(this.markers.length - 1, 1);
-          this.polyline.path = [];
-        },
-        result: function(){
-          //this.openNotificationWithIcon('success');
-        if(this.markers.length >= 5){
-          this.disabled = true;
-          this.$axios
-        .post("http://192.168.1.102:8000/input/", {
-          data: this.sendmess,
-          max_generation: this.inputValue1,
-          population_size: this.inputValue2,
-          p_mutation: this.inputValue,
-        })
-        .then(response => {
-          this.polyline.path = response.data.result;
-          this.time = response.data.time;
-          this.result_distance = response.data.result_distance;
-          let ress = {
-            key: '' + this.key++,
-            time: '' + this.time + 's',
-            length: ''+this.result_distance +'m',
-          }
-          this.data.push(ress);
-          //this.openNotificationWithIcon('success');
-          this.disabled = false;
-        })
-        .catch(error => {
-          //console.log(error);
-          this.disabled = false;
-          this.$message.error(error.response.data.detail);
-          //console.log(error.response.data.detail);
-        });
-        this.way2 = 'result';
-        }else{
-          this.$message.error('标点数量须大于5！！');
-        }
-        
-        },
-        //以下是vue-socket
-        
-      //   initWebSocket(){ //初始化weosocket
-      //   const wsuri = "ws://192.168.1.102:8000";                      //后端接口
-      //   this.websock = new WebSocket(wsuri);
-      //   this.websock.onmessage = this.websocketonmessage;
-      //   this.websock.onopen = this.websocketonopen;
-      //   this.websock.onerror = this.websocketonerror;
-      //   this.websock.onclose = this.websocketclose;
-      // },
-      // websocketonopen(){ //连接建立之后执行send方法发送数据
-      //   let actions = {
-      //     data: this.sendmess,
-      //     max_generation: this.inputValue1,
-      //     population_size: this.inputValue2,
-      //     p_mutation: this.inputValue,
-      //   } ;  //发送markers
-      //   this.websocketsend(JSON.stringify(actions));
-      // },
-      // websocketonerror(){//连接建立失败重连
-      //   this.initWebSocket();
-      // },
-      // websocketonmessage(e){ //数据接收
-      //   const redata = JSON.parse(e.data);
-      // },
-      // websocketsend(Data){//数据发送
-      //   this.websock.send(Data);
-      // },
-      // websocketclose(e){  //关闭
-      //   console.log('断开连接',e);
-      // },
-      }
     };
   },
   computed: {
@@ -343,7 +243,6 @@ module.exports = {
       this.websock.onopen = this.websocketonopen;
       this.websock.onerror = this.websocketonerror;
       this.websock.onclose = this.websocketclose;
-      console.log("连接成功");
     },
     websocketclose(e) {
       //关闭
@@ -360,12 +259,23 @@ module.exports = {
     },
     websocketonmessage(e) {
       try{
-        this.test = JSON.parse(e.data)
+        this.test = JSON.parse(e.data);
         this.$forceUpdate()
+        this.change()
       }
-      catch{
+      catch(err){
+        console.log(err)
         console.log(e.data)
       }
+    },
+    change(){
+      let a = this.markers
+      let b = []
+      this.test.result.forEach(function(element){
+        b.push(a[element].position)
+      })
+      b.push(a[this.test.result[0]].position);
+      this.polyline.path = b;
     },
     websocketsend(Data) {
       //数据发送
@@ -380,48 +290,35 @@ module.exports = {
       this.polyline.path = [];
     },
     result: function () {
-      //this.openNotificationWithIcon('success');
       let thedata = {
-            data: this.sendmess,
-            max_generation: this.inputValue1,
-            population_size: this.inputValue2,
-            p_mutation: this.inputValue,
-          }
+        data: this.sendmess,
+        max_generation: this.inputValue1,
+        population_size: this.inputValue2,
+        p_mutation: this.inputValue,
+      }
       this.websocketsend(JSON.stringify(thedata))
-
-      // if (this.markers.length >= 5) {
-      //   this.disabled = true;
-      //   this.$axios
-      //     .post("http://192.168.1.102:8000/input/", {
-      //       data: this.sendmess,
-      //       max_generation: this.inputValue1,
-      //       population_size: this.inputValue2,
-      //       p_mutation: this.inputValue,
-      //     })
-      //     .then((response) => {
-      //       this.polyline.path = response.data.result;
-      //       this.time = response.data.time;
-      //       this.result_distance = response.data.result_distance;
-      //       let ress = {
-      //         key: "" + this.key++,
-      //         time: "" + this.time,
-      //         length: "" + this.result_distance,
-      //       };
-      //       this.data.push(ress);
-      //       //this.openNotificationWithIcon('success');
-      //       this.disabled = false;
-      //     })
-      //     .catch((error) => {
-      //       //console.log(error);
-      //       this.disabled = false;
-      //       this.$message.error(error.response.data.detail);
-      //       //console.log(error.response.data.detail);
-      //     });
-      //   this.way2 = "result";
-      // } else {
-      //   this.$message.error("标点数量须大于5！！");
-      // }
     },
   },
 };
 </script>
+<style>
+.amap-page-container {
+  height: 570px;
+  width: 920px;
+}
+.toolbar {
+  position: relative;
+  top: -570px;
+  left: 930px;
+}
+.code-box-demo .ant-slider {
+  margin-bottom: 16px;
+}
+.paras {
+  width: 300px;
+  margin-bottom: 8px;
+  /* position: relative;
+    float: right;
+    top: -250px; */
+}
+</style>
