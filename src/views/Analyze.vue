@@ -32,6 +32,20 @@
         <a slot="name" slot-scope="text">{{ text }}</a>
         </a-table>
         <div class="paras">
+           <a-row>
+            <a-col :span="12">
+              <span>迭代精准次数：</span>
+              <a-slider v-model="inputValue1" :min="100" :max="500" />
+            </a-col>
+            <a-col :span="4">
+              <a-input-number
+                v-model="inputValue3"
+                :min="100"
+                :max="500"
+                style="marginleft: 16px"
+              />
+            </a-col>
+          </a-row>
           <a-row>
             <a-col :span="12">
               <span>迭代遗传数：</span>
@@ -79,6 +93,9 @@
         <a-button name="button" v-on:click="removeMarker"
           >remove marker</a-button
         >
+        <a-button name="button" v-on:click="empty"
+          >empty</a-button
+        >
         <a-button
           type="primary"
           name="button"
@@ -118,12 +135,13 @@ module.exports = {
       disabled: false,
       data,
       columns,
-      key: 1,
+      key: -1,
       time: null,
       result_distance: null,
       inputValue: 0,
       inputValue1: 10,
       inputValue2: 10,
+      inputValue3: 100,
       count: 1,
       websock: null,
       slotStyle: {
@@ -282,7 +300,7 @@ module.exports = {
         length: ''+this.test.result_distance
       };
       console.log(infoo);
-      this.data = [infoo];
+      this.data[this.key] = infoo;
     },
     websocketsend(Data) {
       //数据发送
@@ -297,14 +315,26 @@ module.exports = {
       this.polyline.path = [];
     },
     result: function () {
-      let thedata = {
+      if(this.markers.length >= 5)
+      {
+        let thedata = {
         data: this.sendmess,
         max_generation: this.inputValue1,
         population_size: this.inputValue2,
         p_mutation: this.inputValue,
+        fitness_times: this.inputValue3,
       }
-      this.websocketsend(JSON.stringify(thedata))
+      this.websocketsend(JSON.stringify(thedata));
+      this.key++;
+      }else{
+        this.$message.error("标点数量须大于等于5！");
+      }
+      
     },
+    empty: function() {
+      this.markers = [];
+      this.polyline.path = [];
+    }
   },
 };
 </script>
