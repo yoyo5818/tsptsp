@@ -282,7 +282,7 @@ module.exports = {
         length: ''+this.test.result_distance
       };
       console.log(infoo);
-      this.data.push(infoo);
+      this.data = [infoo];
     },
     websocketsend(Data) {
       //数据发送
