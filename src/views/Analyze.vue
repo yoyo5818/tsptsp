@@ -269,13 +269,20 @@ module.exports = {
       }
     },
     change(){
-      let a = this.markers
-      let b = []
+      let a = this.markers;
+      let b = [] ;
       this.test.result.forEach(function(element){
         b.push(a[element].position)
       })
       b.push(a[this.test.result[0]].position);
       this.polyline.path = b;
+      let infoo = {
+        key: '1',
+        time: ''+this.test.time+'s',
+        length: ''+this.test.result_distance
+      };
+      console.log(infoo);
+      this.data.push(infoo);
     },
     websocketsend(Data) {
       //数据发送
